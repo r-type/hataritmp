@@ -15,8 +15,9 @@
 
 #include <math.h>
 #include <float.h>
+#if !defined(VITA)
 #include <fenv.h>
-
+#endif
 #include "sysconfig.h"
 #include "sysdeps.h"
 
@@ -27,7 +28,7 @@
 #endif
 
 #include "options_cpu.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "uae/attributes.h"
 #include "uae/vm.h"
 #include "custom.h"

@@ -32,7 +32,7 @@ const char HatariGlue_fileid[] = "Hatari hatari-glue.c : " __DATE__ " " __TIME__
 #include "sysdeps.h"
 #include "options_cpu.h"
 #include "maccess.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "m68000.h"
 #include "newcpu.h"
 #include "cpu_prefetch.h"

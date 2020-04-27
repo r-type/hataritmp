@@ -17,6 +17,13 @@ const char Paths_fileid[] = "Hatari paths.c : " __DATE__ " " __TIME__;
 #include "paths.h"
 #include "str.h"
 
+#if defined(VITA)
+#include <psp2/types.h>
+#include <psp2/io/dirent.h>
+#include <psp2/kernel/threadmgr.h>
+#define mkdir(name,mode) sceIoMkdir(name, 0777)
+#endif
+
 #if defined(WIN32) && !defined(mkdir)
 #define mkdir(name,mode) mkdir(name)
 #endif  /* WIN32 */
@@ -25,6 +32,8 @@ const char Paths_fileid[] = "Hatari paths.c : " __DATE__ " " __TIME__;
 	#define HATARI_HOME_DIR "Library/Application Support/Hatari"
 #elif defined(WIN32)
 	#define HATARI_HOME_DIR "AppData\\Local\\Hatari"
+#elif defined(WIIU) || defined(VITA)
+	#define HATARI_HOME_DIR "hatari"
 #else
 	#define HATARI_HOME_DIR ".config/hatari"
 #endif
@@ -200,7 +209,40 @@ static char *Paths_InitExecDir(const char *argv0)
 static void Paths_InitHomeDirs(void)
 {
 	char *psHome;
+#ifdef WIIU
 
+	sUserHomeDir = Str_Dup(sWorkingDir);
+        sHatariHomeDir = Str_Alloc(FILENAME_MAX);
+	sprintf(sHatariHomeDir, "%s%c.hatari", sUserHomeDir, PATHSEP);
+	//strcpy(sUserHomeDir, "sd:/retroarch/cores/system");
+	//strcpy(sHatariHomeDir, "sd:/retroarch/cores/system/hatari");
+	if (!File_DirExists(sHatariHomeDir))
+	{
+		if (mkdir(sHatariHomeDir, 0755) != 0)
+		{
+			strcpy(sHatariHomeDir, sUserHomeDir);
+		}
+	}
+
+	return;
+#endif
+
+#ifdef VITA
+	sUserHomeDir = Str_Dup(sWorkingDir);
+        sHatariHomeDir = Str_Alloc(FILENAME_MAX);
+	sprintf(sHatariHomeDir, "%s%c.hatari", sUserHomeDir, PATHSEP);
+	//strcpy(sUserHomeDir, "ux0:/data/retroarch/system");
+	//strcpy(sHatariHomeDir, "ux0:/data/retroarch/system/hatari");
+	if (!File_DirExists(sHatariHomeDir))
+	{
+		if (mkdir(sHatariHomeDir, 0755) != 0)
+		{
+			strcpy(sHatariHomeDir, sUserHomeDir);
+		}
+	}
+
+	return;
+#endif
 	psHome = getenv("HOME");
 	if (psHome)
 	{
@@ -285,6 +327,24 @@ void Paths_Init(const char *argv0)
 {
 	char *psExecDir;  /* Path string where the hatari executable can be found */
 
+
+#ifdef WIIU
+	sWorkingDir = malloc(FILENAME_MAX);
+	sDataDir = Str_Alloc(FILENAME_MAX);
+	strcpy(sWorkingDir, "sd:/retroarch/cores");
+	strcpy(sDataDir, "sd:/retroarch/cores/system");
+	sScreenShotDir = Str_Dup(sWorkingDir);
+	Paths_InitHomeDirs();
+	return;
+#elif defined(VITA)
+	sWorkingDir = malloc(FILENAME_MAX);
+	sDataDir = Str_Alloc(FILENAME_MAX);
+	strcpy(sWorkingDir, "ux0:/data/retroarch/system");
+	strcpy(sDataDir, "ux0:/data/retroarch/system");
+	sScreenShotDir = Str_Dup(sWorkingDir);
+	Paths_InitHomeDirs();
+	return;
+#else
 	/* Init working directory string */
 	sWorkingDir = malloc(FILENAME_MAX);
 	if (!sWorkingDir || getcwd(sWorkingDir, FILENAME_MAX) == NULL)
@@ -292,7 +352,7 @@ void Paths_Init(const char *argv0)
 		/* This should never happen... just in case... */
 		sWorkingDir = Str_Dup(".");
 	}
-
+#endif
 	/* Init the user's home directory string */
 	Paths_InitHomeDirs();
 

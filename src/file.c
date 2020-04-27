@@ -36,6 +36,10 @@ const char File_fileid[] = "Hatari file.c : " __DATE__ " " __TIME__;
 # include <sys/file.h>
 #endif
 
+#ifdef VITA
+#include "retro_files.h"
+#endif
+
 /*-----------------------------------------------------------------------*/
 /**
  * Remove any '/'s from end of filenames, but keeps / intact
@@ -271,7 +275,7 @@ Uint8 *File_ReadAsIs(const char *pszFileName, long *pFileSize)
  * ZIP, first file in it is read).  If pFileSize is non-NULL, read
  * file size is set to that.
  */
-Uint8 *File_Read(const char *pszFileName, long *pFileSize, const char * const ppszExts[])
+Uint8 *HFile_Read(const char *pszFileName, long *pFileSize, const char * const ppszExts[])
 {
 	char *filepath = NULL;
 	Uint8 *pFile = NULL;
@@ -395,6 +399,14 @@ off_t File_Length(const char *pszFileName)
  */
 bool File_Exists(const char *filename)
 {
+#if defined(WIIU) || defined(VITA)
+    FILE * file = fopen(filename, "r");
+    if (file) {
+        fclose(file);
+        return true;
+    }
+    return false;
+#else
 	struct stat buf;
 	if (stat(filename, &buf) == 0 &&
 	    (buf.st_mode & (S_IRUSR|S_IWUSR)) && !S_ISDIR(buf.st_mode))
@@ -403,6 +415,7 @@ bool File_Exists(const char *filename)
 		return true;
 	}
 	return false;
+#endif
 }
 
 
@@ -412,8 +425,23 @@ bool File_Exists(const char *filename)
  */
 bool File_DirExists(const char *path)
 {
+#if defined(WIIU) || defined(VITA)
+	DIR* dir = opendir(path);
+	if (dir)
+	{
+	    /* Directory exists. */
+	    closedir(dir);
+		return true;
+	}
+	else 
+	{
+	    /* Directory does not exist. */
+		return false;
+	}
+#else
 	struct stat buf;
 	return (stat(path, &buf) == 0 && S_ISDIR(buf.st_mode));
+#endif
 }
 
 
@@ -653,7 +681,7 @@ FILE *File_Open(const char *path, const char *mode)
  * Close given FILE pointer and return the closed pointer
  * as NULL for the idiom "fp = File_Close(fp);"
  */
-FILE *File_Close(FILE *fp)
+FILE *HFile_Close(FILE *fp)
 {
 	if (fp && fp != stdin && fp != stdout && fp != stderr)
 	{

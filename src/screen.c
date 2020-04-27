@@ -406,7 +406,7 @@ bool Screen_SetSDLVideoSize(int width, int height, int bitdepth, bool bForceChan
 	if (sdlscrn != NULL && sdlscrn->w == width && sdlscrn->h == height
 	    && sdlscrn->format->BitsPerPixel == bitdepth && !bForceChange)
 		return false;
-
+#ifndef __LIBRETRO__
 	psSdlVideoDriver = SDL_getenv("SDL_VIDEODRIVER");
 	bUseDummyMode = psSdlVideoDriver && !strcmp(psSdlVideoDriver, "dummy");
 	if (bUseDummyMode)
@@ -419,7 +419,7 @@ bool Screen_SetSDLVideoSize(int width, int height, int bitdepth, bool bForceChan
 		/* unhide the Hatari WM window for fullscreen */
 		Control_ReparentWindow(width, height, bInFullScreen);
 	}
-
+#endif
 #if WITH_SDL2
 	bUseSdlRenderer = ConfigureParams.Screen.bUseSdlRenderer && !bUseDummyMode;
 
@@ -806,7 +806,7 @@ void Screen_Init(void)
 	ScreenDrawFunctionsNormal[ST_HIGH_RES] = Screen_ConvertHighRes;
 
 	Video_SetScreenRasters();                       /* Set rasters ready for first screen */
-
+#ifndef __LIBRETRO__
 	/* Load and set icon */
 	snprintf(sIconFileName, sizeof(sIconFileName), "%s%chatari-icon.bmp",
 	         Paths_GetDataDir(), PATHSEP);
@@ -822,6 +822,7 @@ void Screen_Init(void)
 #endif
 		SDL_FreeSurface(pIconSurf);
 	}
+#endif
 
 	/* Configure some SDL stuff: */
 	SDL_ShowCursor(SDL_DISABLE);
@@ -1643,6 +1644,13 @@ static int AdjustLinePaletteRemap(int y)
 	return ScrUpdateFlag;
 }
 
+#ifdef __LIBRETRO__
+void reset_screen(){
+Resolution_Init();
+//Screen_SetResolution();
+Screen_SetFullUpdate();
+}
+#endif
 
 /*-----------------------------------------------------------------------*/
 /**

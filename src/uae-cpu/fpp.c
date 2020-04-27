@@ -18,7 +18,7 @@ const char FPP_fileid[] = "Hatari fpp.c : " __DATE__ " " __TIME__;
 
 #include "sysdeps.h"
 #include "hatari-glue.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"
 #include "savestate.h"
 

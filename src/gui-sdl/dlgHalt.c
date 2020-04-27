@@ -18,6 +18,8 @@ const char DlgHalt_fileid[] = "Hatari dlgHalt.c : " __DATE__ " " __TIME__;
 #include "sdlgui.h"
 #include "m68000.h"
 
+#include "gui-retro.h"
+
 #define DLGHALT_WARM	2
 #define DLGHALT_COLD	3
 #define DLGHALT_DEBUG	4
@@ -32,7 +34,7 @@ static SGOBJ haltdlg[] = {
 	{ SGBUTTON, SG_DEFAULT, 0,  6,3, 12,1, "_Warm reset" },
 	{ SGBUTTON, 0,          0,  6,5, 12,1, "_Cold reset" },
 	{ SGBUTTON, 0,          0, 28,3, 18,1, "Console _debugger" },
-	{ SGBUTTON, SG_CANCEL,  0, 28,5, 18,1, "_Quit Hatari" },
+	{ SGBUTTON,SG_EXIT/* SG_CANCEL*/,  0, 28,5, 18,1, "_Quit Hatari" },
 	{ SGSTOP, 0, 0, 0,0, 0,0, NULL }
 };
 
@@ -75,7 +77,12 @@ void Dialog_HaltDlg(void)
 	if (SDLGui_SetScreen(sdlscrn))
 		return;
 	SDLGui_CenterDlg(haltdlg);
-	switch (SDLGui_DoDialog(haltdlg, NULL, false)) {
+int but;
+do
+{
+but=SDLGui_DoDialog(haltdlg, NULL, false);
+
+	switch (but/*SDLGui_DoDialog(haltdlg, NULL, false)*/) {
 
 	case DLGHALT_WARM:
 		/* Reset to exit 'halt' state (resets CPU and regs.spcflags) */
@@ -96,8 +103,13 @@ void Dialog_HaltDlg(void)
 		break;
 	default:
 		/* GUI errors */
-		do_quit(1);
+		//do_quit(1);
 	}
+        gui_poll_events();
+}
+while (but != DLGSYS_EXIT && but != SDLGUI_QUIT
+	       && but != SDLGUI_ERROR && !bQuitProgram);
+
 	SDL_ShowCursor(show);
 #if WITH_SDL2
 	SDL_SetRelativeMouseMode(mode);

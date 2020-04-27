@@ -7,6 +7,10 @@
 #ifndef HATARI_GEMDOS_H
 #define HATARI_GEMDOS_H
 
+#ifdef __LIBRETRO__
+#include <stdint.h>
+#include <utime.h>
+#endif
 
 typedef struct {
   char hd_emulation_dir[FILENAME_MAX];     /* hd emulation directory (Host OS) */

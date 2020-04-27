@@ -12,8 +12,9 @@
 
 #include <math.h>
 #include <float.h>
+#if !defined(VITA)
 #include <fenv.h>
-
+#endif
 #include "sysconfig.h"
 #include "sysdeps.h"
 
@@ -22,11 +23,13 @@
 #include "hatari-glue.h"
 #endif
 
+#if !defined(VITA)
 #define USE_HOST_ROUNDING 1
+#endif
 #define SOFTFLOAT_CONVERSIONS 1
 
 #include "options_cpu.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"
 #include "fpp.h"
 #include "uae/attributes.h"

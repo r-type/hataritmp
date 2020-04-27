@@ -38,7 +38,7 @@
 #endif
 
 #include "options_cpu.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"
 #include "debug.h"
 #include "cpummu030.h"

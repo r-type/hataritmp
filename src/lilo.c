@@ -395,7 +395,7 @@ static void *load_file(const char *filename, uint32_t *length)
 #ifdef HAVE_LIBZ
 	buffer = File_ZlibRead(filename, &nFileLength);
 #else
-	buffer = File_ReadAsIs(filename, &nFileLength);
+	buffer = HFile_ReadAsIs(filename, &nFileLength);
 #endif
 	*length = nFileLength;
 

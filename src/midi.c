@@ -22,6 +22,7 @@
 */
 const char Midi_fileid[] = "Hatari midi.c : " __DATE__ " " __TIME__;
 
+#include <libretro.h>
 #include <SDL_types.h>
 
 #include "main.h"
@@ -36,6 +37,7 @@ const char Midi_fileid[] = "Hatari midi.c : " __DATE__ " " __TIME__;
 #include "screen.h"
 #include "video.h"
 
+struct retro_midi_interface *MidiRetroInterface;
 
 #define ACIA_SR_INTERRUPT_REQUEST  0x80
 #define ACIA_SR_TX_EMPTY           0x02
@@ -441,8 +443,8 @@ static bool Midi_Host_Open(void)
 static void Midi_Host_Close(void)
 {
 #ifndef HAVE_PORTMIDI
-	pMidiFhIn = File_Close(pMidiFhIn);
-	pMidiFhOut = File_Close(pMidiFhOut);
+	pMidiFhIn = HFile_Close(pMidiFhIn);
+	pMidiFhOut = HFile_Close(pMidiFhOut);
 #else
 	if (midiIn)
 		Pm_Close(midiIn);

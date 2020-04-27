@@ -66,7 +66,7 @@
 #ifdef UAE
 #include "options.h"
 #include "events.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "custom.h"
 #else
 #include "cpu_emulation.h"

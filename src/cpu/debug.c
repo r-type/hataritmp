@@ -19,7 +19,7 @@
 
 #include "options_cpu.h"
 //#include "uae.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "custom.h"
 #include "newcpu.h"
 #include "cpu_prefetch.h"

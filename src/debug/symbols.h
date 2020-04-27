@@ -7,7 +7,9 @@
 
 #ifndef HATARI_SYMBOLS_H
 #define HATARI_SYMBOLS_H
-
+#ifdef __LIBRETRO__
+#include <stdint.h>
+#endif
 typedef enum {
 	SYMTYPE_TEXT = 1,  /* Needs to be smallest number for sorting! */
 	SYMTYPE_DATA = 2,

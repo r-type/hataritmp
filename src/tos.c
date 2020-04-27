@@ -958,7 +958,7 @@ static uint8_t *TOS_LoadImage(void)
 
 	/* Load TOS image into memory so that we can check its version */
 	TosVersion = 0;
-	pTosFile = File_Read(ConfigureParams.Rom.szTosImageFileName, &nFileSize, pszTosNameExts);
+	pTosFile = HFile_Read(ConfigureParams.Rom.szTosImageFileName, &nFileSize, pszTosNameExts);
 
 	if (!pTosFile || nFileSize <= 0)
 	{

@@ -57,6 +57,44 @@ static inline void do_put_mem_word(void *a, uae_u16 v)
 #else  /* Cpu can not access unaligned memory: */
 
 
+#ifdef VITA
+
+static inline uae_u16 do_get_mem_word(void *a)
+{
+  uae_u16 v;
+   __asm__ __volatile__ (
+						"ldrh %[v], [%[a]] \n\t"
+						"rev16 %[v], %[v] \n\t"
+           : [v] "=r" (v) : [a] "r" (a) ); 
+  return v;
+}
+
+static inline uae_u32 do_get_mem_long(void *a) 
+{
+  uae_u32 v;
+   __asm__ __volatile__ (
+						"ldr %[v], [%[a]] \n\t"
+						"rev %[v], %[v] \n\t"
+           : [v] "=r" (v) : [a] "r" (a) ); 
+  return v;
+}
+
+static inline void do_put_mem_word(void *a, uae_u32 v)
+{
+   __asm__ __volatile__ (
+						"rev16 r2, %[v] \n\t"
+						"strh r2, [%[a]] \n\t"
+           : : [v] "r" (v), [a] "r" (a) : "r2", "memory" ); 
+}
+
+static inline void do_put_mem_long(void *a, uae_u32 v)
+{
+   __asm__ __volatile__ (
+						"rev r2, %[v] \n\t"
+						"str r2, [%[a]] \n\t"
+           : : [v] "r" (v), [a] "r" (a) : "r2", "memory" ); 
+}
+#else
 static inline uae_u32 do_get_mem_long(void *a)
 {
 	uae_u8 *b = (uae_u8 *)a;
@@ -90,6 +128,7 @@ static inline void do_put_mem_word(void *a, uae_u16 v)
 	b[1] = v;
 }
 
+#endif
 
 #endif  /* CPU_CAN_ACCESS_UNALIGNED */
 

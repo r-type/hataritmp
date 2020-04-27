@@ -64,6 +64,13 @@ const char Gemdos_fileid[] = "Hatari gemdos.c : " __DATE__ " " __TIME__;
 #include "maccess.h"
 #include "symbols.h"
 
+#if defined(VITA)
+#include <psp2/types.h>
+#include <psp2/io/dirent.h>
+#include <psp2/kernel/threadmgr.h>
+#define mkdir(name,mode) sceIoMkdir(name, 0777)
+#define rmdir(name) sceIoRmdir(name)
+#endif
 /* Maximum supported length of a GEMDOS path: */
 #define MAX_GEMDOS_PATH 256
 
@@ -1970,11 +1977,13 @@ static bool GemDOS_Create(Uint32 Params)
 		 */
 		if (Mode & GEMDOS_FILE_ATTRIB_READONLY)
 		{
+#ifndef VITA
 			/* after closing, file should be read-only */
 			if (chmod(szActualFileName, S_IRUSR|S_IRGRP|S_IROTH))
 			{
 				perror("Failed to set file to read-only");
 			}
+#endif
 		}
 		/* Tag handle table entry as used in this process and return handle */
 		FileHandles[Index].bUsed = true;
@@ -2564,8 +2573,10 @@ static bool GemDOS_Fattrib(Uint32 Params)
 	
 	if (nAttrib & GEMDOS_FILE_ATTRIB_READONLY)
 	{
+#ifndef VITA
 		/* set read-only (readable by all) */
 		if (chmod(sActualFileName, S_IRUSR|S_IRGRP|S_IROTH) == 0)
+#endif
 		{
 			Regs[REG_D0] = nAttrib;
 			return true;
@@ -2573,8 +2584,10 @@ static bool GemDOS_Fattrib(Uint32 Params)
 	}
 	else
 	{
+#ifndef VITA
 		/* set writable (by user, readable by all) */
 		if (chmod(sActualFileName, S_IWUSR|S_IRUSR|S_IRGRP|S_IROTH) == 0)
+#endif
 		{
 			Regs[REG_D0] = nAttrib;
 			return true;

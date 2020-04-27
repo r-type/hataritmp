@@ -21,7 +21,7 @@
 
 #include "cycles.h"     /* for nCyclesMainCounter */
 #include "sysdeps.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"     /* for regs */
 #include "cycInt.h"
 #include "log.h"

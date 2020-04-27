@@ -5,7 +5,7 @@
 #include "main.h"
 #include "options_cpu.h"
 #include "debug.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"
 #include "fpp.h"
 #include "debugmem.h"

@@ -114,6 +114,7 @@ static void Audio_CallBack(void *userdata, Uint8 *stream, int len)
  */
 void Audio_Init(void)
 {
+#ifndef __LIBRETRO__	/* RETRO HACK */
 	SDL_AudioSpec desiredAudioSpec;    /* We fill in the desired SDL audio options here */
 
 	/* Is enabled? */
@@ -182,7 +183,7 @@ void Audio_Init(void)
 		Log_Printf(LOG_WARN, "Soundbuffer size is too big (%d > %d)!\n",
 			   SoundBufferSize, MIXBUFFER_SIZE/2);
 	}
-
+#endif	/* RETRO HACK */
 	/* All OK */
 	bSoundWorking = true;
 	/* And begin */
@@ -227,6 +228,10 @@ void Audio_Unlock(void)
 	SDL_UnlockAudio();
 }
 
+#ifdef __LIBRETRO__
+extern int CHANGE_RATE;
+extern float SAMPLERATE;
+#endif
 
 /*-----------------------------------------------------------------------*/
 /**
@@ -239,6 +244,15 @@ void Audio_SetOutputAudioFreq(int nNewFrequency)
 	{
 		/* Set new frequency */
 		nAudioFrequency = nNewFrequency;
+
+#ifdef __LIBRETRO__
+		float tmp=(float)nAudioFrequency;
+		if(tmp!=SAMPLERATE)
+		{
+			SAMPLERATE=(float)nAudioFrequency;
+			CHANGE_RATE=1;
+		}
+#endif
 
 		if (Config_IsMachineFalcon())
 		{

@@ -294,7 +294,7 @@ Uint8 *IPF_ReadDisk(int Drive, const char *pszFileName, long *pImageSize, int *p
 	*pImageSize = 0;
 
 	/* Just load directly a buffer, and set ImageSize accordingly */
-	pIPFFile = File_Read(pszFileName, pImageSize, NULL);
+	pIPFFile = HFile_Read(pszFileName, pImageSize, NULL);
 	if (!pIPFFile)
 	{
 		*pImageSize = 0;
@@ -591,7 +591,7 @@ return true;						/* This function is not used for now, always return true */
 			memcpy ( TrackSide_pointer , TrackSide_buf , 4 );
 			Log_Printf ( LOG_INFO , "IPF : insert raw stream drive=%d track=%d side=%d %s\n" , Drive , Track , Side , TrackFileName );
 
-			p = File_Read ( TrackFileName , &Size , NULL);
+			p = HFile_Read ( TrackFileName , &Size , NULL);
 			if ( p )
 			{
 				IPF_RawStreamImage[ Drive ][ Track ][Side].TrackData = p;

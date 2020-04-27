@@ -12,7 +12,7 @@
 #include "sysdeps.h"
 
 #include "options.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "custom.h"
 #include "newcpu.h"
 #include "ersatz.h"

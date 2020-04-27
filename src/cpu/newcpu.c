@@ -29,7 +29,7 @@
 
 #include "options_cpu.h"
 #include "events.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "custom.h"
 #include "newcpu.h"
 #include "disasm.h"

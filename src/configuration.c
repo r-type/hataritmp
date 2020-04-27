@@ -10,10 +10,13 @@
   to edit the file manually.
 */
 const char Configuration_fileid[] = "Hatari configuration.c : " __DATE__ " " __TIME__;
-
+#ifdef __LIBRETRO__
+#include "SDL.h"
+#endif
 #include <SDL_keyboard.h>
+#ifndef __LIBRETRO__
 #include <SDL_joystick.h>
-
+#endif
 #include "main.h"
 #include "configuration.h"
 #include "cfgopts.h"

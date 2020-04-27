@@ -62,6 +62,10 @@ const char Main_fileid[] = "Hatari main.c : " __DATE__ " " __TIME__;
 #include "falcon/dsp.h"
 #include "falcon/videl.h"
 
+#ifdef __LIBRETRO__
+#include "retromain.inc"
+#endif
+
 #if HAVE_GETTIMEOFDAY
 #include <sys/time.h>
 #endif
@@ -83,7 +87,7 @@ static bool bAccurateDelays;              /* Host system has an accurate SDL_Del
 
 static bool bIgnoreNextMouseMotion = false;  /* Next mouse motion will be ignored (needed after SDL_WarpMouse) */
 static bool bAllowMouseWarp = true;       /* disabled when Hatari window loses mouse pointer / key focus */
-
+#ifndef __LIBRETRO__
 
 /*-----------------------------------------------------------------------*/
 /**
@@ -114,7 +118,9 @@ static Uint32 Main_GetTicks(void)
 #else
 # define Main_GetTicks SDL_GetTicks
 #endif
-
+#else
+# define Main_GetTicks SDL_GetTicks
+#endif
 
 //#undef HAVE_GETTIMEOFDAY
 //#undef HAVE_NANOSLEEP
@@ -151,6 +157,9 @@ static Sint64	Time_GetTicks ( void )
 
 static void	Time_Delay ( Sint64 ticks_micro )
 {
+#ifdef VITA
+SDL_Delay ( (Uint32)(ticks_micro / 1000) ) ;
+#else
 #if HAVE_NANOSLEEP
 	struct timespec	ts;
 	int		ret;
@@ -164,6 +173,7 @@ static void	Time_Delay ( Sint64 ticks_micro )
 	} while ( ret && ( errno == EINTR ) );		/* keep on sleeping if we were interrupted */
 #else
 	SDL_Delay ( (Uint32)(ticks_micro / 1000) ) ;	/* micro sec -> milli sec */
+#endif
 #endif
 }
 
@@ -258,6 +268,9 @@ void Main_RequestQuit(int exitval)
 	{
 		/* Assure that CPU core shuts down */
 		M68000_SetSpecial(SPCFLAG_BRK);
+#ifdef __LIBRETRO__
+pauseg=-1;
+#endif
 	}
 	nQuitValue = exitval;
 }
@@ -321,6 +334,13 @@ void Main_WaitOnVbl(void)
 	Sint64 FrameDuration_micro;
 	Sint64 nDelay;
 
+#ifdef __LIBRETRO__
+if(pauseg==1)pause_select();
+co_switch(mainThread);
+#if defined(WIIU) || defined(VITA)
+return;
+#endif
+#endif
 	nVBLCount++;
 	if (nRunVBLs &&	nVBLCount >= nRunVBLs)
 	{
@@ -452,7 +472,14 @@ void Main_WarpMouse(int x, int y, bool restore)
 #if WITH_SDL2
 	SDL_WarpMouseInWindow(sdlWindow, x, y);
 #else
+
+#ifdef __LIBRETRO__
+fmousex=x;
+fmousey=y;
+#else
 	SDL_WarpMouse(x, y);
+#endif
+
 #endif
 	bIgnoreNextMouseMotion = true;
 }
@@ -462,7 +489,11 @@ void Main_WarpMouse(int x, int y, bool restore)
 /**
  * Handle mouse motion event.
  */
+#ifdef __LIBRETRO__
+void Main_HandleMouseMotion()
+#else
 static void Main_HandleMouseMotion(SDL_Event *pEvent)
+#endif
 {
 	int dx, dy;
 	static int ax = 0, ay = 0;
@@ -474,10 +505,13 @@ static void Main_HandleMouseMotion(SDL_Event *pEvent)
 		bIgnoreNextMouseMotion = false;
 		return;
 	}
-
+#ifdef __LIBRETRO__
+dx = fmousex;
+dy = fmousey;
+#else
 	dx = pEvent->motion.xrel;
 	dy = pEvent->motion.yrel;
-
+#endif
 	/* In zoomed low res mode, we divide dx and dy by the zoom factor so that
 	 * the ST mouse cursor stays in sync with the host mouse. However, we have
 	 * to take care of lowest bit of dx and dy which will get lost when
@@ -509,6 +543,11 @@ static void Main_HandleMouseMotion(SDL_Event *pEvent)
  */
 void Main_EventHandler(void)
 {
+
+#ifdef __LIBRETRO__
+if (ConfigureParams.Sound.bEnableSound)SND=1;
+else SND=-1;
+#else
 	bool bContinueProcessing;
 	SDL_Event event;
 	int events;
@@ -696,6 +735,7 @@ void Main_EventHandler(void)
 			break;
 		}
 	} while (bContinueProcessing || !(bEmulationActive || bQuitProgram));
+#endif
 }
 
 
@@ -743,7 +783,11 @@ static void Main_Init(void)
 	if (!Log_Init())
 	{
 		fprintf(stderr, "ERROR: logging/tracing initialization failed\n");
+#ifndef __LIBRETRO__
 		exit(-1);
+#else
+		pauseg=-1;
+#endif
 	}
 	Log_Printf(LOG_INFO, PROG_NAME ", compiled on:  " __DATE__ ", " __TIME__ "\n");
 
@@ -758,7 +802,11 @@ static void Main_Init(void)
 	if ( IPF_Init() != true )
 	{
 		fprintf(stderr, "ERROR: could not initialize the IPF support\n" );
+#ifndef __LIBRETRO__
 		exit(-1);
+#else
+		pauseg=-1;
+#endif
 	}
 
 	ClocksTimings_InitMachine ( ConfigureParams.System.nMachineType );
@@ -808,6 +856,9 @@ static void Main_Init(void)
 		if (!bTosImageLoaded)
 			fprintf(stderr, "ERROR: failed to load TOS image!\n");
 		SDL_Quit();
+#ifdef __LIBRETRO__
+retro_shutdown_hatari();
+#endif 
 		exit(-2);
 	}
 
@@ -824,7 +875,11 @@ static void Main_Init(void)
 /**
  * Un-Initialise emulation
  */
+#ifndef __LIBRETRO__
 static void Main_UnInit(void)
+#else
+static void Main_UnInit(void)
+#endif 
 {
 	Screen_ReturnFromFullScreen();
 	Floppy_UnInit();
@@ -869,10 +924,16 @@ static void Main_LoadInitialConfig(void)
 	psGlobalConfig = malloc(FILENAME_MAX);
 	if (psGlobalConfig)
 	{
+#ifdef __LIBRETRO__
+snprintf(psGlobalConfig, FILENAME_MAX, "%s%chatari.cfg",RETRO_DIR, PATHSEP);
+printf("RetroConf:'%s'\n",psGlobalConfig);
+#else
+
 #if defined(__AMIGAOS4__)
 		strncpy(psGlobalConfig, CONFDIR"hatari.cfg", FILENAME_MAX);
 #else
 		snprintf(psGlobalConfig, FILENAME_MAX, CONFDIR"%chatari.cfg", PATHSEP);
+#endif
 #endif
 		/* Try to load the global configuration file */
 		Configuration_Load(psGlobalConfig);
@@ -943,7 +1004,11 @@ static void Main_StatusbarSetup(void)
  * 
  * Note: 'argv' cannot be declared const, MinGW would then fail to link.
  */
+#ifdef __LIBRETRO__
+int hmain(int argc, char *argv[])
+#else
 int main(int argc, char *argv[])
+#endif
 {
 	/* Generate random seed */
 	srand(time(NULL));
@@ -967,13 +1032,22 @@ int main(int argc, char *argv[])
 	if (!Opt_ParseParameters(argc, (const char * const *)argv))
 	{
 		Control_RemoveFifo();
+#ifndef __LIBRETRO__
 		return 1;
+#endif
 	}
+#ifdef __LIBRETRO__
+	// After initial configuration was loaded
+	// Set tos.img in retro_system_dir
+	snprintf(ConfigureParams.Rom.szTosImageFileName, FILENAME_MAX, "%s", RETRO_TOS);
+#endif
 	/* monitor type option might require "reset" -> true */
 	Configuration_Apply(true);
 
 #ifdef WIN32
+#ifndef __LIBRETRO__
 	Win_OpenCon();
+#endif
 #endif
 
 #if HAVE_SETENV
@@ -1016,6 +1090,8 @@ int main(int argc, char *argv[])
 	}
 	/* Un-init emulation system */
 	Main_UnInit();
-
+#ifdef __LIBRETRO__
+pauseg=-1;
+#endif
 	return nQuitValue;
 }

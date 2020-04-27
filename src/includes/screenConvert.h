@@ -4,7 +4,9 @@
   This file is distributed under the GNU General Public License, version 2
   or at your option any later version. Read the file gpl.txt for details.
 */
-
+#ifdef __LIBRETRO__
+#include <stdint.h>
+#endif
 void Screen_RemapPalette(void);
 void Screen_SetPaletteColor(Uint8 idx, Uint8 red, Uint8 green, Uint8 blue);
 void ScreenConv_MemorySnapShot_Capture(bool bSave);

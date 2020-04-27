@@ -47,6 +47,10 @@ const char DebugUI_fileid[] = "Hatari debugui.c : " __DATE__ " " __TIME__;
 #include "symbols.h"
 #include "vars.h"
 
+#ifdef VITA
+#include "retro_files.h"
+#endif
+
 FILE *debugOutput;
 
 static dbgcommand_t *debugCommand;
@@ -104,7 +108,7 @@ static void DebugUI_SetLogDefault(void)
 	{
 		if (debugOutput)
 		{
-			File_Close(debugOutput);
+			HFile_Close(debugOutput);
 			fprintf(stderr, "Debug log closed.\n");
 		}
 		debugOutput = stderr;
@@ -120,7 +124,7 @@ static int DebugUI_SetLogFile(int nArgc, char *psArgs[])
 	if (debugOutput != stderr)
 	{
 		fprintf(stderr, "Debug log closed.\n");
-		File_Close(debugOutput);
+		HFile_Close(debugOutput);
 	}
 	debugOutput = stderr;
 

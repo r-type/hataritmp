@@ -32,7 +32,7 @@
 
 
 #include "options_cpu.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"
 #include "cpummu.h"
 #include "debug.h"

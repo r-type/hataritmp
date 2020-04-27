@@ -18,7 +18,7 @@
 #ifdef WINUAE_FOR_HATARI
 #include "compat.h"
 #include "maccess.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "custom.h"
 
 /* Possible exceptions sources for M68000_Exception() and Exception() */

@@ -9,6 +9,9 @@
 */
 const char HatariGlue_fileid[] = "Hatari hatari-glue.c : " __DATE__ " " __TIME__;
 
+#ifdef __LIBRETRO__
+#include <stdint.h>
+#endif
 
 #include <stdio.h>
 
@@ -30,7 +33,7 @@ const char HatariGlue_fileid[] = "Hatari hatari-glue.c : " __DATE__ " " __TIME__
 
 #include "sysdeps.h"
 #include "maccess.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "m68000.h"
 #include "newcpu.h"
 #include "hatari-glue.h"

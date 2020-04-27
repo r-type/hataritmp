@@ -142,7 +142,7 @@ const char NewCpu_fileid[] = "Hatari newcpu.c : " __DATE__ " " __TIME__;
 #include "sysdeps.h"
 #include "hatari-glue.h"
 #include "maccess.h"
-#include "memory.h"
+#include "uae_memory.h"
 #include "newcpu.h"
 #include "main.h"
 #include "m68000.h"

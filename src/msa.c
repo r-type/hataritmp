@@ -250,7 +250,7 @@ Uint8 *MSA_ReadDisk(int Drive, const char *pszFileName, long *pImageSize, int *p
 	*pImageSize = 0;
 
 	/* Read in file */
-	pMsaFile = File_Read(pszFileName, &nFileSize, NULL);
+	pMsaFile = HFile_Read(pszFileName, &nFileSize, NULL);
 	if (pMsaFile)
 	{
 		/* Uncompress into disk buffer */

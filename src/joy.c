@@ -193,6 +193,15 @@ void Joy_UnInit(void)
 	}
 }
 
+#ifdef __LIBRETRO__
+
+#define  SDL_HAT_CENTERED   0x0
+#define    SDL_HAT_UP       0x1
+#define    SDL_HAT_RIGHT    0x2
+#define    SDL_HAT_DOWN     0x4
+#define    SDL_HAT_LEFT     0x8
+
+#endif
 
 /*-----------------------------------------------------------------------*/
 /**
