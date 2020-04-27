@@ -3169,6 +3169,9 @@ static void IKBD_CustomCodeHandler_AudioSculpture_Write ( Uint8 aciabyte )
 	}
 }
 
+#ifdef __MINGW32__
+#define PRId64 lld
+#endif
 
 void IKBD_Info(FILE *fp, Uint32 dummy)
 {

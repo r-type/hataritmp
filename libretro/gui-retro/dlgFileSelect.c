@@ -110,7 +110,7 @@ static float scrollbar_Ypos = 0.0;		/* scrollbar heigth */
 
 static char *dirpath;				/* for get_dtype() */
 
-#if !defined(VITA)
+#if !defined(VITA) && !defined(__MINGW32__)
 #define HAVE_DIRENT_D_TYPE
 #endif
 
