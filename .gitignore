@@ -3,7 +3,7 @@
 *.o
 *.pyc
 
-config.h
+#config.h
 CMakeCache.txt
 cmake_install.cmake
 CTestTestfile.cmake
