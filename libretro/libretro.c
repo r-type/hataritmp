@@ -558,6 +558,10 @@ void retro_deinit(void)
 {	 
    Emu_uninit(); 
 
+   pauseg=0;
+   co_switch(emuThread);
+   co_switch(mainThread);
+
    if(emuThread)
    {
       co_delete(emuThread);
