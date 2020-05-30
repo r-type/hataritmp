@@ -35,6 +35,7 @@
 #include "disasm.h"
 #include "cpummu.h"
 #include "cpummu030.h"
+#include "cputbl.h"
 #include "cpu_prefetch.h"
 #include "debugmem.h"
 #include "savestate.h"
@@ -104,6 +105,7 @@ static int baseclock;
 int m68k_pc_indirect;
 bool m68k_interrupt_delay;
 static bool m68k_reset_delay;
+static bool ismoves_nommu;
 
 #ifndef WINUAE_FOR_HATARI
 static volatile uae_atomic uae_interrupt;
@@ -280,6 +282,8 @@ uae_u32(*x_phys_get_long)(uaecptr);
 void(*x_phys_put_byte)(uaecptr, uae_u32);
 void(*x_phys_put_word)(uaecptr, uae_u32);
 void(*x_phys_put_long)(uaecptr, uae_u32);
+
+bool(*is_super_access)(bool);
 
 static void set_x_cp_funcs(void)
 {
@@ -871,7 +875,7 @@ void(*write_data_030_fc_wput)(uaecptr, uae_u32, uae_u32);
 void(*write_data_030_fc_lput)(uaecptr, uae_u32, uae_u32);
 
  
- static void set_x_ifetches(void)
+static void set_x_ifetches(void)
 {
 	if (m68k_pc_indirect) {
 		if (currprefs.cachesize) {
@@ -941,9 +945,35 @@ void set_x_funcs_hatari_blitter (int flag)
 
 #endif
 
+static bool is_super_access_68000(bool read)
+{
+	return regs.s;
+}
+static bool nommu_is_super_access(bool read)
+{
+	if (!ismoves_nommu) {
+		return regs.s;
+	} else {
+		uae_u32 fc = read ? regs.sfc : regs.dfc;
+		return (fc & 4) != 0;
+	}
+}
+
 // indirect memory access functions
 static void set_x_funcs (void)
 {
+	if (currprefs.cpu_model >= 68010) {
+		if (currprefs.mmu_model == 68030) {
+			is_super_access = mmu030_is_super_access;
+		} else if (currprefs.mmu_model >= 68040) {
+			is_super_access = mmu_is_super_access;
+		} else {
+			is_super_access = nommu_is_super_access;
+		}
+	} else {
+		is_super_access = is_super_access_68000;
+	}
+
 	if (currprefs.mmu_model) {
 		if (currprefs.cpu_model == 68060) {
 
@@ -2117,14 +2147,15 @@ static void update_68k_cycles (void)
 	}
 	if (cpucycleunit < 1)
 		cpucycleunit = 1;
-	if (!currprefs.cpu_cycle_exact && currprefs.cpu_compatible) {
+#if 0
+	if (!currprefs.cpu_cycle_exact && !currprefs.cpu_memory_cycle_exact && currprefs.cpu_compatible) {
 		if (cpucycleunit == CYCLE_UNIT / 2) {
 			cycles_mult = 0;
 		} else {
 			cycles_mult = cpucycleunit * (CYCLES_DIV / (CYCLE_UNIT / 2));
 		}
 	}
-
+#endif
 	if (currprefs.cpu_cycle_exact || currprefs.cpu_compatible)
 		write_log (_T("CPU cycleunit: %d (%.3f)\n"), cpucycleunit, (float)cpucycleunit / CYCLE_UNIT);
 write_log (_T("CPU cycleunit: %d (%.3f)\n"), cpucycleunit, (float)cpucycleunit / CYCLE_UNIT);
@@ -2949,7 +2980,6 @@ kludge_me_do:
 	m68k_setpc (newpc);
 	branch_stack_push(currpc, currpc);
 	regs.ir = x_get_word (m68k_getpc ()); // prefetch 1
-#if HARDWARE_BUS_ERROR_EMULATION
 	if (hardware_bus_error) {
 		if (nr == 2 || nr == 3) {
 			cpu_halt(CPU_HALT_DOUBLE_FAULT);
@@ -2958,7 +2988,6 @@ kludge_me_do:
 		exception2_fetch(regs.irc, 0);
 		return;
 	}
-#endif
 	regs.ird = regs.ir;
 	x_do_cycles (2 * cpucycleunit);
 #ifdef WINUAE_FOR_HATARI
@@ -2977,7 +3006,6 @@ kludge_me_do:
 	regs.ipl_pin = intlev();
 	ipl_fetch();
 	regs.irc = x_get_word (m68k_getpc () + 2); // prefetch 2
-#if HARDWARE_BUS_ERROR_EMULATION
 	if (hardware_bus_error) {
 		if (nr == 2 || nr == 3) {
 			cpu_halt(CPU_HALT_DOUBLE_FAULT);
@@ -2986,7 +3014,6 @@ kludge_me_do:
 		exception2_fetch(regs.ir, 2);
 		return;
 	}
-#endif
 #ifdef JIT
 	set_special (SPCFLAG_END_COMPILE);
 #endif
@@ -4687,6 +4714,18 @@ static bool do_specialties_interrupt (int Pending)
 }
 #endif
 
+static void check_debugger(void)
+{
+	if (regs.spcflags & SPCFLAG_BRK) {
+		unset_special(SPCFLAG_BRK);
+#ifdef DEBUGGER
+		if (debugging) {
+			debug();
+		}
+#endif
+	}
+}
+
 static int do_specialties (int cycles)
 {
 	bool stopped_debug = false;
@@ -5091,6 +5130,7 @@ static void m68k_run_1 (void)
 	Log_Printf(LOG_DEBUG, "m68k_run_1\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY (prb) {
 			while (!exit) {
 				r->opcode = r->ir;
@@ -5203,6 +5243,7 @@ static void m68k_run_1_ce (void)
 	Log_Printf(LOG_DEBUG, "m68k_run_1_ce\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY (prb) {
 			if (first) {
 				if (cpu_tracer < 0) {
@@ -5944,6 +5985,7 @@ static void m68k_run_mmu060 (void)
 #endif
 
 	while (!halt) {
+		check_debugger();
 		TRY (prb) {
 			for (;;) {
 #ifdef WINUAE_FOR_HATARI
@@ -6033,6 +6075,7 @@ static void m68k_run_mmu040 (void)
 #endif
 
 	while (!halt) {
+		check_debugger();
 		TRY (prb) {
 			for (;;) {
 #ifdef WINUAE_FOR_HATARI
@@ -6132,6 +6175,7 @@ static void m68k_run_mmu030 (void)
 	mmu030_fake_prefetch = -1;
 	check_halt();
 	while(!halt) {
+		check_debugger();
 		TRY (prb) {
 			for (;;) {
 				int cnt;
@@ -6337,6 +6381,7 @@ static void m68k_run_3ce (void)
 	Log_Printf(LOG_DEBUG, "m68k_run_3ce\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY(prb) {
 			while (!exit) {
 #ifdef WINUAE_FOR_HATARI
@@ -6429,6 +6474,7 @@ static void m68k_run_3p(void)
 	Log_Printf(LOG_DEBUG, "m68k_run_3p\n");
 
 	while (!exit)  {
+		check_debugger();
 		TRY(prb) {
 			while (!exit) {
 #ifdef WINUAE_FOR_HATARI
@@ -6519,6 +6565,7 @@ static void m68k_run_2ce (void)
 	Log_Printf(LOG_DEBUG, "m68k_run_2ce\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY(prb) {
 			if (first) {
 				if (cpu_tracer < 0) {
@@ -6719,6 +6766,7 @@ static void m68k_run_2p (void)
 	Log_Printf(LOG_DEBUG, "m68k_run_2p\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY(prb) {
 
 			if (first) {
@@ -6951,6 +6999,7 @@ static void m68k_run_2_000(void)
 	Log_Printf(LOG_DEBUG, "m68k_run_2_000\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY(prb) {
 			while (!exit) {
 #ifdef WINUAE_FOR_HATARI
@@ -7039,6 +7088,7 @@ static void m68k_run_2_020(void)
 	Log_Printf(LOG_DEBUG, "m68k_run_2_020\n");
 
 	while (!exit) {
+		check_debugger();
 		TRY(prb) {
 			while (!exit) {
 #ifdef WINUAE_FOR_HATARI
@@ -7327,6 +7377,7 @@ void m68k_go (int may_quit)
 				build_cpufunctbl();
 				m68k_setpc_normal(pc);
 				fill_prefetch();
+				update_68k_cycles();
 			}
 			if (cpu_prefs_changed_flag & 2) {
 				fixup_cpu(&changed_prefs);
@@ -8425,17 +8476,26 @@ void exception2_setup(uae_u32 opcode, uaecptr addr, bool read, int size, uae_u32
 	}
 }
 
-void exception2(uaecptr addr, bool read, int size, uae_u32 fc)
+// Common hardware bus error entry point. Both for MMU and non-MMU emulation.
+void hardware_exception2(uaecptr addr, uae_u32 v, bool read, bool ins, int size)
 {
-	if (currprefs.mmu_model) {
+	if (currprefs.cpu_model <= 68010 && currprefs.cpu_compatible && HARDWARE_BUS_ERROR_EMULATION) {
+		hardware_bus_error = 1;
+	} else if (currprefs.mmu_model) {
 		if (currprefs.mmu_model == 68030) {
-			uae_u32 flags = size == 1 ? MMU030_SSW_SIZE_B : (size == 2 ? MMU030_SSW_SIZE_W : MMU030_SSW_SIZE_L);
-			mmu030_page_fault (addr, read, flags, fc);
+			 mmu030_hardware_bus_error(addr, v, read, ins, size);
 		} else {
-			mmu_bus_error (addr, 0, fc, read == false, size, 0, true);
+			mmu_hardware_bus_error(addr, v, read, ins, size);
 		}
+		return;
 	} else {
-		exception2_setup(regs.opcode, addr, read, size == 1 ? 0 : (size == 2 ? 1 : 2), fc);
+		int fc = (regs.s ? 4 : 0) | (ins ? 2 : 1);
+		if (ismoves_nommu) {
+			ismoves_nommu = false;
+			fc = read ? regs.sfc : regs.dfc;
+		}
+		// Non-MMU
+		exception2_setup(regs.opcode, addr, read, size, fc);
 		THROW(2);
 	}
 }
@@ -10655,6 +10715,7 @@ void fill_prefetch_030_ntx(void)
 		idx = add_prefetch_030(idx, regs.cacheholdingdata020 >>	16, pc2);
 	}
 
+	ipl_fetch();
 	if (currprefs.cpu_cycle_exact)
 		regs.irc = get_word_ce030_prefetch_opcode (0);
 	else
@@ -10709,6 +10770,7 @@ void fill_prefetch_030_ntx_continue (void)
 		}
 	}
 
+	ipl_fetch();
 	if (currprefs.cpu_cycle_exact)
 		regs.irc = get_word_ce030_prefetch_opcode (0);
 	else
@@ -10741,6 +10803,7 @@ void fill_prefetch_020_ntx(void)
 		idx = add_prefetch_030(idx, regs.cacheholdingdata020 >>	16, pc);
 	}
 
+	ipl_fetch();
 	if (currprefs.cpu_cycle_exact)
 		regs.irc = get_word_ce020_prefetch_opcode (0);
 	else
@@ -10816,36 +10879,48 @@ STATIC_INLINE bool cpuboard_fc_check(uaecptr addr, uae_u32 *v, int size, bool wr
 uae_u32 sfc_nommu_get_byte(uaecptr addr)
 {
 	uae_u32 v;
+	ismoves_nommu = true;
 	if (!cpuboard_fc_check(addr, &v, 0, false))
 		v = x_get_byte(addr);
+	ismoves_nommu = false;
 	return v;
 }
 uae_u32 sfc_nommu_get_word(uaecptr addr)
 {
 	uae_u32 v;
+	ismoves_nommu = true;
 	if (!cpuboard_fc_check(addr, &v, 1, false))
 		v = x_get_word(addr);
+	ismoves_nommu = false;
 	return v;
 }
 uae_u32 sfc_nommu_get_long(uaecptr addr)
 {
 	uae_u32 v;
+	ismoves_nommu = true;
 	if (!cpuboard_fc_check(addr, &v, 2, false))
 		v = x_get_long(addr);
+	ismoves_nommu = false;
 	return v;
 }
 void dfc_nommu_put_byte(uaecptr addr, uae_u32 v)
 {
+	ismoves_nommu = true;
 	if (!cpuboard_fc_check(addr, &v, 0, true))
 		x_put_byte(addr, v);
+	ismoves_nommu = false;
 }
 void dfc_nommu_put_word(uaecptr addr, uae_u32 v)
 {
+	ismoves_nommu = true;
 	if (!cpuboard_fc_check(addr, &v, 1, true))
 		x_put_word(addr, v);
+	ismoves_nommu = false;
 }
 void dfc_nommu_put_long(uaecptr addr, uae_u32 v)
 {
+	ismoves_nommu = true;
 	if (!cpuboard_fc_check(addr, &v, 2, true))
 		x_put_long(addr, v);
+	ismoves_nommu = false;
 }

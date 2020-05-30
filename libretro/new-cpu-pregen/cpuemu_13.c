@@ -2,7 +2,7 @@
 #include "sysdeps.h"
 #include "hatari-glue.h"
 #include "maccess.h"
-#include "uae_memory.h"
+#include "memory.h"
 #include "custom.h"
 #include "newcpu.h"
 #include "cpu_prefetch.h"
@@ -1021,6 +1021,7 @@ void REGPARAM2 CPUFUNC(op_00a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -3912,6 +3913,7 @@ void REGPARAM2 CPUFUNC(op_02a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -5304,6 +5306,7 @@ void REGPARAM2 CPUFUNC(op_04a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -6756,6 +6759,7 @@ void REGPARAM2 CPUFUNC(op_06a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -9592,6 +9596,7 @@ void REGPARAM2 CPUFUNC(op_0aa0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -10831,6 +10836,7 @@ void REGPARAM2 CPUFUNC(op_0ca0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -12421,6 +12427,7 @@ void REGPARAM2 CPUFUNC(op_0ea0_13)(uae_u32 opcode)
 			if (dstreg + 8 == ((extra >> 12) & 15)) {
 				src += -2;
 			}
+			m68k_areg(regs, dstreg) = dsta;
 			m68k_incpci(6);
 			m68k_areg(regs, dstreg) = dsta;
 			exception3_write_access(opcode, dsta, 2, src >> 16, 1);
@@ -12455,6 +12462,7 @@ void REGPARAM2 CPUFUNC(op_0ea0_13)(uae_u32 opcode)
 		if (srca & 1) {
 			regs.irc = extra;
 			regs.write_buffer = extra;
+			m68k_areg(regs, dstreg) = srca;
 			m68k_incpci(4);
 			m68k_areg(regs, dstreg) = srca;
 			exception3_read_access(opcode, srca, 2, 1);
@@ -17118,6 +17126,7 @@ void REGPARAM2 CPUFUNC(op_2020_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -17623,6 +17632,7 @@ void REGPARAM2 CPUFUNC(op_2060_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -18230,6 +18240,7 @@ void REGPARAM2 CPUFUNC(op_20a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -19051,6 +19062,7 @@ void REGPARAM2 CPUFUNC(op_20e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -19643,6 +19655,7 @@ void REGPARAM2 CPUFUNC(op_2100_13)(uae_u32 opcode)
 	do_cycles_ce000_internal(2);
 	uae_u16 oldflags = regflags.cznv;
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(4);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -19698,6 +19711,7 @@ void REGPARAM2 CPUFUNC(op_2108_13)(uae_u32 opcode)
 	do_cycles_ce000_internal(2);
 	uae_u16 oldflags = regflags.cznv;
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(4);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -19780,6 +19794,7 @@ void REGPARAM2 CPUFUNC(op_2110_13)(uae_u32 opcode)
 		loop_mode = 1;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(4);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -19864,6 +19879,7 @@ void REGPARAM2 CPUFUNC(op_2118_13)(uae_u32 opcode)
 		loop_mode = 1;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(4);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -19910,6 +19926,7 @@ void REGPARAM2 CPUFUNC(op_2120_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -19950,6 +19967,7 @@ void REGPARAM2 CPUFUNC(op_2120_13)(uae_u32 opcode)
 		loop_mode = 1;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(4);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20026,6 +20044,7 @@ void REGPARAM2 CPUFUNC(op_2128_13)(uae_u32 opcode)
 		return;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20102,6 +20121,7 @@ void REGPARAM2 CPUFUNC(op_2130_13)(uae_u32 opcode)
 		return;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20176,6 +20196,7 @@ void REGPARAM2 CPUFUNC(op_2138_13)(uae_u32 opcode)
 		return;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20255,6 +20276,7 @@ void REGPARAM2 CPUFUNC(op_2139_13)(uae_u32 opcode)
 		return;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(8);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20330,6 +20352,7 @@ void REGPARAM2 CPUFUNC(op_213a_13)(uae_u32 opcode)
 		return;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20406,6 +20429,7 @@ void REGPARAM2 CPUFUNC(op_213b_13)(uae_u32 opcode)
 		return;
 	}
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(6);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20469,6 +20493,7 @@ void REGPARAM2 CPUFUNC(op_213c_13)(uae_u32 opcode)
 	}
 	uae_u16 oldflags = regflags.cznv;
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(8);
 		ccr_68000_long_move_ae_normal(src);
 		m68k_areg(regs, dstreg) = dsta + 4;
@@ -20760,6 +20785,7 @@ void REGPARAM2 CPUFUNC(op_2160_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -21594,6 +21620,7 @@ void REGPARAM2 CPUFUNC(op_21a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -22427,6 +22454,7 @@ void REGPARAM2 CPUFUNC(op_21e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -23272,6 +23300,7 @@ void REGPARAM2 CPUFUNC(op_23e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -30664,6 +30693,7 @@ void REGPARAM2 CPUFUNC(op_40a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -34505,6 +34535,7 @@ void REGPARAM2 CPUFUNC(op_44a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -34997,6 +35028,7 @@ void REGPARAM2 CPUFUNC(op_44e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 2;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(4);
 		exception3_read_access2(opcode, srca, 1, 1);
 		return;
@@ -36287,6 +36319,7 @@ void REGPARAM2 CPUFUNC(op_46a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -39549,6 +39582,7 @@ void REGPARAM2 CPUFUNC(op_4aa0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -43564,6 +43598,7 @@ void REGPARAM2 CPUFUNC(op_50a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -45334,6 +45369,7 @@ void REGPARAM2 CPUFUNC(op_51a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -54686,6 +54722,7 @@ void REGPARAM2 CPUFUNC(op_80a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -56687,6 +56724,7 @@ void REGPARAM2 CPUFUNC(op_81a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -58975,6 +59013,7 @@ void REGPARAM2 CPUFUNC(op_90a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -61002,6 +61041,7 @@ void REGPARAM2 CPUFUNC(op_9188_13)(uae_u32 opcode)
 	uaecptr srca;
 	srca = m68k_areg(regs, srcreg) - 4;
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		srca += 2;
 		exception3_read_access(opcode, srca, 2, 1);
@@ -61023,6 +61063,7 @@ void REGPARAM2 CPUFUNC(op_9188_13)(uae_u32 opcode)
 	uaecptr dsta;
 	dsta = m68k_areg(regs, dstreg) - 4;
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		dsta += 2;
 		exception3_read_access(opcode, dsta, 2, 1);
@@ -61267,6 +61308,7 @@ void REGPARAM2 CPUFUNC(op_91a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -61817,6 +61859,7 @@ void REGPARAM2 CPUFUNC(op_91e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -63395,6 +63438,7 @@ void REGPARAM2 CPUFUNC(op_b0a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -65529,6 +65573,7 @@ void REGPARAM2 CPUFUNC(op_b1a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -66029,6 +66074,7 @@ void REGPARAM2 CPUFUNC(op_b1e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -67542,6 +67588,7 @@ void REGPARAM2 CPUFUNC(op_c0a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -69511,6 +69558,7 @@ void REGPARAM2 CPUFUNC(op_c1a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -71634,6 +71682,7 @@ void REGPARAM2 CPUFUNC(op_d0a0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
@@ -73673,6 +73722,7 @@ void REGPARAM2 CPUFUNC(op_d188_13)(uae_u32 opcode)
 	uaecptr srca;
 	srca = m68k_areg(regs, srcreg) - 4;
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		srca += 2;
 		exception3_read_access(opcode, srca, 2, 1);
@@ -73694,6 +73744,7 @@ void REGPARAM2 CPUFUNC(op_d188_13)(uae_u32 opcode)
 	uaecptr dsta;
 	dsta = m68k_areg(regs, dstreg) - 4;
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		dsta += 2;
 		exception3_read_access(opcode, dsta, 2, 1);
@@ -73938,6 +73989,7 @@ void REGPARAM2 CPUFUNC(op_d1a0_13)(uae_u32 opcode)
 	dsta = m68k_areg(regs, dstreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (dsta & 1) {
+		m68k_areg(regs, dstreg) = dsta;
 		m68k_incpci(2);
 		exception3_read_access(opcode, dsta, 2, 1);
 		return;
@@ -74492,6 +74544,7 @@ void REGPARAM2 CPUFUNC(op_d1e0_13)(uae_u32 opcode)
 	srca = m68k_areg(regs, srcreg) - 4;
 	do_cycles_ce000_internal(2);
 	if (srca & 1) {
+		m68k_areg(regs, srcreg) = srca;
 		m68k_incpci(2);
 		exception3_read_access(opcode, srca, 2, 1);
 		return;
