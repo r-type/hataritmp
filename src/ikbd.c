@@ -90,6 +90,10 @@ const char IKBD_fileid[] = "Hatari ikbd.c : " __DATE__ " " __TIME__;
 #include "acia.h"
 #include "clocks_timings.h"
 
+#ifdef __LIBRETRO__
+#include <stdint.h>
+#include <inttypes.h>
+#endif
 
 #define DBL_CLICK_HISTORY  0x07     /* Number of frames since last click to see if need to send one or two clicks */
 #define ACIA_CYCLES    7200         /* Cycles (Multiple of 4) between sent to ACIA from keyboard along serial line - 500Hz/64, (approx' 6920-7200cycles from test program) */
