@@ -54,6 +54,18 @@ ifeq ($(platform), unix)
 ifeq ($(ARCH), arm)
    CFLAGS += -mno-unaligned-access
 endif
+else ifeq ($(platform), crosspi)
+   	CC = arm-linux-gnueabihf-gcc
+   	CXX =arm-linux-gnueabihf-g++
+   	AR = arm-linux-gnueabihf-ar
+	TARGET := $(TARGET_NAME)_libretro.so
+	fpic := -fPIC
+	SHARED := -lpthread -shared -Wl,--version-script=$(LIBRETRO_DIR)/link.T -Wl,--no-undefined
+	CFLAGS += -marm -mtune=cortex-a7 -mfpu=neon-vfpv4 -mfloat-abi=hard
+	HAVE_NEON = 1
+	ARCH = arm
+	PLATFLAGS := -DLSB_FIRST -DALIGN_DWORD
+        CFLAGS += -march=armv7-a
 else ifeq ($(platform), android)
    CC = arm-linux-androideabi-gcc
    AR = @arm-linux-androideabi-ar
