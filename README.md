@@ -6,8 +6,8 @@ Basic port. Based on hatari 2.2.1.
 
 |RetroPad button|Action|
 |---|---|
-|A|Fire - Mouse button 1 / Red|
-|B|Button opt config B - Mouse button 2 / Blue|
+|A|Fire - Mouse button 1|
+|B|Button opt config B - Mouse button 2|
 |X|Toggle shift|
 |Y|Enter GUI|
 |Select|Toggle mouse emulation|
