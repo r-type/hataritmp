@@ -129,9 +129,9 @@ void retro_set_environment(retro_environment_t cb)
          "JOYPAD_R2 config",
          {
             { "1", "key 1" },
-            { "y", "ctrl key" },
-            { "n", "space key" },
-            { "j", "ctrl key" },
+            { "y", "y key" },
+            { "n", "n key" },
+            { "j", "j key" },
             { "s", "space key" },
             { NULL, NULL },
          },

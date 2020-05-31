@@ -130,7 +130,7 @@ void DlgSystem_Main(void)
 	do
 	{
 	/* Show the dialog: */
-	SDLGui_DoDialog(systemdlg, NULL, false);
+	but=SDLGui_DoDialog(systemdlg, NULL, false);
                 gui_poll_events();
 	}
 	while (but != DLGSYS_EXIT && but != SDLGUI_QUIT

@@ -920,6 +920,9 @@ void Configuration_SetDefault(void)
 #endif
 }
 
+#ifdef __LIBRETRO__
+extern void restore_res();
+#endif
 
 /*-----------------------------------------------------------------------*/
 /**
@@ -933,6 +936,9 @@ void Configuration_Apply(bool bReset)
 
 	if (bReset)
 	{
+#ifdef __LIBRETRO__
+		restore_res();
+#endif
 		/* Set resolution change */
 		bUseVDIRes = ConfigureParams.Screen.bUseExtVdiResolutions;
 		bUseHighRes = ((!bUseVDIRes) && ConfigureParams.Screen.nMonitorType == MONITOR_TYPE_MONO)
