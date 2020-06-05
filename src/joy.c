@@ -12,6 +12,8 @@ const char Joy_fileid[] = "Hatari joy.c : " __DATE__ " " __TIME__;
 
 #include <SDL.h>
 
+#include "../libretro/retrosdljoy.c"
+
 #include "main.h"
 #include "configuration.h"
 #include "ioMem.h"
@@ -134,7 +136,9 @@ void Joy_Init(void)
 	};
 
 	int i, j, nPadsConnected;
-
+#if __LIBRETRO__
+SDL_JoystickInit();
+#endif
 	/* Initialise SDL's joystick subsystem: */
 	if (SDL_InitSubSystem(SDL_INIT_JOYSTICK) < 0)
 	{
@@ -224,6 +228,25 @@ static bool Joy_ReadJoystick(int nSdlJoyID, JOYREADING *pJoyReading)
 		pJoyReading->YPos = -32768;
 	if (hat & SDL_HAT_DOWN)
 		pJoyReading->YPos = 32767;
+
+#ifdef __LIBRETRO__
+   //   RETRO           B    Y    SLT  STA  UP   DWN  LEFT RGT  A    X    L    R    L2   R2   L3   R3
+   //   INDEX           0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
+if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 4))pJoyReading->YPos = -32768;
+if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 5))pJoyReading->YPos = 32767;
+if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 6))pJoyReading->XPos = -32768;
+if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 7))pJoyReading->XPos = 32767;
+
+	/* Sets bit #0 if button #1 is pressed: */
+	pJoyReading->Buttons = SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 8);
+	/* Sets bit #1 if button #2 is pressed: */
+	if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 0))
+		pJoyReading->Buttons |= JOYREADING_BUTTON2;
+	/* Sets bit #2 if button #3 is pressed: */
+	if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 1))
+		pJoyReading->Buttons |= JOYREADING_BUTTON3;
+#else
+
 	/* Sets bit #0 if button #1 is pressed: */
 	pJoyReading->Buttons = SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 0);
 	/* Sets bit #1 if button #2 is pressed: */
@@ -232,7 +255,7 @@ static bool Joy_ReadJoystick(int nSdlJoyID, JOYREADING *pJoyReading)
 	/* Sets bit #2 if button #3 is pressed: */
 	if (SDL_JoystickGetButton(sdlJoystick[nSdlJoyID], 2))
 		pJoyReading->Buttons |= JOYREADING_BUTTON3;
-
+#endif
 	return true;
 }
 

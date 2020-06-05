@@ -250,7 +250,7 @@ static void update_variables(void)
 			break;
 		case HATARI_VIDEO_CR_HI:
 			retrow = 832;
-			retroh = 520;
+			retroh = 552;
 			hatari_borders = false;
 			break;
    }
@@ -685,7 +685,9 @@ void retro_run(void)
 
    if(pauseg==0)
    {
-      update_input();
+      hatari_input_poll();
+      draw_stuff();
+      //update_input();
 
       if(SND==1)
       {

@@ -1191,7 +1191,7 @@ int SDLGui_DoDialog(SGOBJ *dlg, SDL_Event *pEventOut, bool KeepCurrentObject)
 	SDL_Event sdlEvent;
 	SDL_Surface *pBgSurface;
 	SDL_Rect dlgrect, bgrect;
-	SDL_Joystick *joy = NULL;
+	//SDL_Joystick *joy = NULL;
 #if !WITH_SDL2
 	int nOldUnicodeMode;
 #endif
@@ -1298,8 +1298,8 @@ int SDLGui_DoDialog(SGOBJ *dlg, SDL_Event *pEventOut, bool KeepCurrentObject)
 		}
 	}
 
-	if (SDL_NumJoysticks() > 0)
-		joy = SDL_JoystickOpen(0);
+	//if (SDL_NumJoysticks() > 0)
+	//	joy = SDL_JoystickOpen(0);
 
 #if !WITH_SDL2
 	/* Enable unicode translation to get shifted etc chars with SDL_PollEvent */
@@ -1562,8 +1562,8 @@ int SDLGui_DoDialog(SGOBJ *dlg, SDL_Event *pEventOut, bool KeepCurrentObject)
 #if !WITH_SDL2
 	//SDL_EnableUNICODE(nOldUnicodeMode);
 #endif
-	if (joy)
-		SDL_JoystickClose(joy);
+	//if (joy)
+	//	SDL_JoystickClose(joy);
 
 	Dprintf(("EXIT - ret: %d, current: %d\n", retbutton, current_object));
 	return retbutton;

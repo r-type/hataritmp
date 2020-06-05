@@ -547,6 +547,9 @@ void Main_EventHandler(void)
 #ifdef __LIBRETRO__
 if (ConfigureParams.Sound.bEnableSound)SND=1;
 else SND=-1;
+update_input();
+SDL_JoystickUpdate();
+
 #else
 	bool bContinueProcessing;
 	SDL_Event event;

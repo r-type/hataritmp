@@ -99,6 +99,7 @@ Uint8 type;
 #define SDL_UnlockAudio();
 #define SDL_PauseAudio(a);
 //JOY
+/*
 #define SDL_Joystick int
 #define SDL_NumJoysticks() 0
 #define SDL_JoystickOpen(i) NULL
@@ -109,6 +110,7 @@ Uint8 type;
 #define SDL_JoystickGetButton(...) 0
 #define SDL_JoystickNumAxes(...) 0
 #define SDL_JoystickNumButtons(a) 16
+*/
 //MOUSE
 #define SDL_GetMouseState(X,Y) GuiGetMouseState((X),(Y))
 

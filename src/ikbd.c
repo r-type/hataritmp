@@ -1359,6 +1359,7 @@ static void IKBD_DuplicateMouseFireButtons(void)
 		/* Is fire button pressed? */
 		if (KeyboardProcessor.Joy.JoyData[1]&0x80)
 		{
+
 			KeyboardProcessor.Joy.JoyData[1] &= 0x7f;  /* Clear fire button bit */
 			Keyboard.bRButtonDown |= BUTTON_JOYSTICK;  /* Mimic right mouse button */
 		}
@@ -1416,29 +1417,12 @@ static void IKBD_SendRelMousePacket(void)
 	}
 }
 
-#ifdef __LIBRETRO__
-//FIXME ADD MXjoy1
-extern unsigned char MXjoy0;
-extern int NUMjoy;
-extern int MOUSEMODE;
-
-#endif
 
 /**
  * Get joystick data
  */
 static void IKBD_GetJoystickData(void)
 {
-#ifdef __LIBRETRO__
-	/* Joystick 1 */
-	KeyboardProcessor.Joy.JoyData[1] =MXjoy0;
-
-
-	/* If mouse is on, joystick 0 is not connected */
-	if ((MOUSEMODE==-1 && NUMjoy==-1) && (KeyboardProcessor.MouseMode==AUTOMODE_OFF||(bBothMouseAndJoy && KeyboardProcessor.MouseMode==AUTOMODE_MOUSEREL)) )
-		KeyboardProcessor.Joy.JoyData[0] = MXjoy0;
-	else	KeyboardProcessor.Joy.JoyData[0] = 0x00;
-#else
 
 	/* Joystick 1 */
 	KeyboardProcessor.Joy.JoyData[1] = Joy_GetStickData(1);
@@ -1450,7 +1434,7 @@ static void IKBD_GetJoystickData(void)
 
 	else
 		KeyboardProcessor.Joy.JoyData[0] = 0x00;
-#endif
+
 }
 
 

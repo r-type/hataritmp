@@ -225,9 +225,10 @@ endif
 ifeq ($(DEBUG), 1)
    CFLAGS := $(CFLAGS) -Og -g
 else
-   CFLAGS := -funroll-loops -ffast-math -fomit-frame-pointer $(CFLAGS) -O3
+   CFLAGS := $(CFLAGS) -O3 -DNDEBUG  -funroll-loops -ffast-math -fomit-frame-pointer -fsigned-char  -fno-builtin
 endif
-CFLAGS := -fsigned-char -D__LIBRETRO__ -fno-builtin $(CFLAGS)
+
+CFLAGS += -D__LIBRETRO__ 
 
 CFLAGS := $(fpic) $(CFLAGS) $(PLATFLAGS)
 CXXFLAGS := $(CFLAGS)  -std=c++11  -fpermissive

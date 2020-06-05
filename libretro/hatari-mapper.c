@@ -93,6 +93,12 @@ void retro_set_input_poll(retro_input_poll_t cb)
    input_poll_cb = cb;
 }
 
+short int libretro_input_state_cb(unsigned port,unsigned device,unsigned index,unsigned id){
+	//if(sdlinitok==0)return 0;
+	return input_state_cb(port,device,index,id);
+
+} 
+
 long GetTicks(void)
 { // in MSec
 #ifndef _ANDROID_
@@ -418,6 +424,39 @@ void retro_key_up(unsigned char retrok)
    IKBD_PressSTKey(retrok,0);
 }
 
+#if 0
+unsigned char joystate[5]={0,0,0,0,0};
+unsigned char joystate2[5]={0,0,0,0,0};
+unsigned char joyval[5]={0x01,0x02,0x04,0x08,0x80};
+
+int Proccess_joy(void)
+{
+   int i;
+   int res=0;
+
+   for(i=0;i<5;i++)
+   {
+	joystate[i]=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0,RETRO_DEVICE_ID_JOYPAD_UP+i) ? 1: 0;
+
+         if(joystate[i] && joystate2[i]==0)
+         {
+            MXjoy0 |=joyval[i];
+            joystate2[i]=1;
+	    res=1;//return res;
+         }
+         else if ( !joystate[i] && joystate2[i]==1 )
+         {
+            MXjoy0 &=~joyval[i];
+            joystate2[i]=0;
+	    res=1;//return res;
+
+         }
+
+   }
+return res;
+}
+#endif
+
 void Process_key(void)
 {
    int i;
@@ -479,6 +518,33 @@ unsigned short Retropad[16]={0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 #define retropad(a) Retropad[a]
 
+#if 0
+void getjoydata()
+{
+  static unsigned char jbt[16]={ 0,0,0,0,  0x01,0x02,0x04,0x08,0x80, 0,   0,   0,   0,   0,   0,   0};
+  int i;
+
+  MXjoy0=0;
+  input_poll_cb();
+  for(i=0;i<16;i++)Retropad[i]=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i);
+
+  if(MOUSEMODE==-1)for(i=RETRO_DEVICE_ID_JOYPAD_UP;i<=RETRO_DEVICE_ID_JOYPAD_A;i++)if(retropad(i))MXjoy0 |= jbt[i]; // Joy press	
+}
+#endif
+
+static int vkx=0,vky=0;
+
+void hatari_input_poll()
+{
+   input_poll_cb();
+}
+
+void draw_stuff()
+{
+  if(SHOWKEY==1)virtual_kdb(bmp,vkx,vky);
+  if(STATUTON==1)Print_Statut();
+}
+
 void update_input(void)
 {
    int i;
@@ -486,18 +552,12 @@ void update_input(void)
    //   INDEX           0    1    2    3    4    5    6    7    8    9    10   11   12   13   14   15
    static unsigned char vbt[16]={ 0,0,0,0,  0x01,0x02,0x04,0x08,0x80, 0,   0,   0,   0,   0,   0,   0};
    static int oldi=-1;
-   static int vkx=0,vky=0;
 
-   MXjoy0=0;
    if(oldi!=-1)
    {
       IKBD_PressSTKey(oldi,0);
       oldi=-1;
    }
-
-   input_poll_cb();
-
-   Process_key();
 
    for(i=0;i<16;i++)Retropad[i]=input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, i);
 
@@ -565,8 +625,7 @@ void update_input(void)
       Screen_SetFullUpdate();
    }
 
-
-   if(SHOWKEY==1)
+  if(SHOWKEY==1)
    {
       static int vkflag[5]={0,0,0,0,0};		
 
@@ -589,6 +648,7 @@ void update_input(void)
       if ( retropad(RETRO_DEVICE_ID_JOYPAD_LEFT) && vkflag[2]==0 )
          vkflag[2]=1;
       else if (vkflag[2]==1 && ! retropad(RETRO_DEVICE_ID_JOYPAD_LEFT) )
+
       {
          vkflag[2]=0;
          vkx -= 1;
@@ -607,7 +667,7 @@ void update_input(void)
       if(vky<0)vky=NLIGN-1;
       if(vky>NLIGN-1)vky=0;
 
-      virtual_kdb(bmp,vkx,vky);
+      //virtual_kdb(bmp,vkx,vky);
 
       if(retropad(RETRO_DEVICE_ID_JOYPAD_A)  && vkflag[4]==0) 	
          vkflag[4]=1;
@@ -668,11 +728,15 @@ void update_input(void)
          }
       }
 
-      if(STATUTON==1)
-         Print_Statut();
+    //  if(STATUTON==1)
+    //      Print_Statut();
 
       return;
    }
+
+// JOY && MOUSE 
+
+   //MXjoy0=0;
 
    static int mbL=0,mbR=0;
    int mouse_l;
@@ -684,7 +748,8 @@ void update_input(void)
    {
       //Joy mode
       //emulate Joy0 with joy analog left 
-      
+
+#if 0    
       al[0] =(input_state_cb(0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X));///2;
       al[1] =(input_state_cb(0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y));///2;
 
@@ -700,7 +765,70 @@ void update_input(void)
          MXjoy0 |= ATARIJOY_BITMASK_RIGHT;
 
 
-      for(i=RETRO_DEVICE_ID_JOYPAD_UP;i<=RETRO_DEVICE_ID_JOYPAD_A;i++)if(retropad(i))MXjoy0 |= vbt[i]; // Joy press	
+	if(Proccess_joy()==1){putikdb();return;}
+/*
+      static unsigned char oldj=0,oldmove=0;
+
+      if(oldj!=0){
+	if(!retropad(oldmove)){
+		MXjoy0 &= ~oldj;
+		oldj=0;
+		oldmove=0;
+	}
+		
+	return;
+      }
+
+      if(retropad(RETRO_DEVICE_ID_JOYPAD_UP)){
+
+	MXjoy0 &= ~ATARIJOY_BITMASK_DOWN;
+	MXjoy0 |= ATARIJOY_BITMASK_UP;
+	oldj=ATARIJOY_BITMASK_UP;
+	oldmove=RETRO_DEVICE_ID_JOYPAD_UP;
+	return;
+      }
+      else if(retropad(RETRO_DEVICE_ID_JOYPAD_DOWN)){
+
+	MXjoy0 &= ~ATARIJOY_BITMASK_UP;
+	MXjoy0 |= ATARIJOY_BITMASK_DOWN;
+	oldj=ATARIJOY_BITMASK_DOWN;
+	oldmove=RETRO_DEVICE_ID_JOYPAD_DOWN;
+	return;
+      }
+      else if(retropad(RETRO_DEVICE_ID_JOYPAD_LEFT)){
+
+	MXjoy0 &= ~ATARIJOY_BITMASK_RIGHT;
+	MXjoy0 |= ATARIJOY_BITMASK_LEFT; 
+	oldj=ATARIJOY_BITMASK_LEFT;
+	oldmove=RETRO_DEVICE_ID_JOYPAD_LEFT;
+	return;
+      }
+      else if(retropad(RETRO_DEVICE_ID_JOYPAD_RIGHT)){
+
+	MXjoy0 &= ~ATARIJOY_BITMASK_LEFT;
+	MXjoy0 |= ATARIJOY_BITMASK_RIGHT;
+	oldj=ATARIJOY_BITMASK_RIGHT;
+	oldmove=RETRO_DEVICE_ID_JOYPAD_RIGHT;
+	return;
+      }
+      else if(retropad(RETRO_DEVICE_ID_JOYPAD_A)){
+
+	MXjoy0 |= ATARIJOY_BITMASK_FIRE;
+	oldj=ATARIJOY_BITMASK_FIRE;
+	oldmove=RETRO_DEVICE_ID_JOYPAD_A;
+	return;
+      }
+*/
+
+/*
+
+      for(i=RETRO_DEVICE_ID_JOYPAD_UP;i<=RETRO_DEVICE_ID_JOYPAD_A;i++)
+		if(retropad(i))MXjoy0 |= vbt[i]; // Joy press	
+		else if(retropad(i)==0)MXjoy0 &= ~vbt[i]; // Joy press	
+
+      if(MXjoy0!=0)return;
+*/
+
 
       // Joy autofire
       if( retropad(RETRO_DEVICE_ID_JOYPAD_B) )
@@ -713,6 +841,7 @@ void update_input(void)
 	         	if ((nVBLs&0x7)<4)
 	         	   MXjoy0 &= ~ATARIJOY_BITMASK_FIRE;
 		 	break;
+
 		case 1://crtl
                		oldi=0x1d;
                		IKBD_PressSTKey(0x1d,1);
@@ -757,7 +886,7 @@ void update_input(void)
 	    }
 
       }
-
+#endif
       mouse_x = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
       mouse_y = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
       mouse_l    = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT);
@@ -835,8 +964,13 @@ void update_input(void)
 
    Main_HandleMouseMotion();
 
-   if(STATUTON==1)
-      Print_Statut();
+//   if(STATUTON==1)
+//      Print_Statut();
+
+// KEYBOARD
+
+   Process_key();
+  
 }
 
 void input_gui(void)
